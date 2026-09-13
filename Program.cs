@@ -2,34 +2,45 @@
 using System;
 using System.IO;
 using Kiogas;
-class Program {
-    static void Main(string[] argv) {
-        if (argv.Length < 2) {
+class Program
+{
+    static void Main(string[] argv)
+    {
+        if (argv.Length < 2)
+        {
             WriteLine("parser.huh: uh... what am i supposed to parse? please provide a .kyo file as an argument.");
             return;
         }
-        
-        Parser parser =  new Parser();
+
+        Parser parser = new Parser();
         string file = "";
         // Kind of redundant, but the check above may not catch this
-        try {
+        try
+        {
             file = argv[1];
-        } catch (IndexOutOfRangeException) {
+        }
+        catch (IndexOutOfRangeException)
+        {
             WriteLine("parser.huh: uh... what am i supposed to parse? please provide a .kyo file as an argument.");
             return;
         }
-            
-        if (File.Exists(file)) {
+
+        if (File.Exists(file))
+        {
             parser.parse(file);
-        } else {
+        }
+        else
+        {
             throw new Exception("external.fileSys: The file you passed does not exist in this context.");
         }
 
-        if (!file.Contains(".")) {
+        if (!file.Contains("."))
+        {
             WriteLine("external.fileSys.extension.missing: No file extension found");
             return;
         }
-        else if (!file.EndsWith(".kyo")) {
+        else if (!file.EndsWith(".kyo"))
+        {
             string[] temp = file.Split(".");
             WriteLine($"external.fileSys.extension.incorrect: Expected .kyo extension, got .{temp[1]}");
             return;
