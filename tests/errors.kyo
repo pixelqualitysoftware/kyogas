@@ -1,0 +1,74 @@
+negative_byte: [byte] = -1
+overflow_byte: [byte] = 256
+
+negative_int: [int] = -2147483649
+overflow_int: [int] = 2147483648
+
+negative_uint: [uint] = -1
+
+invalid_float: [flt] = what_the_fuck
+
+invalid_string: [str] = \q
+
+invalid_bool: [bool] = maybe
+
+missing_byte: [byte]
+missing_int: [int]
+missing_uint: [uint]
+missing_flt: [flt]
+missing_str: [str]
+missing_bool: [bool]
+
+duplicate: [int] = 1
+duplicate: [int] = 2
+
+arr.u8 <- bytes:
+-1
+256
+-999
+999
+-1
+256
+->
+
+arr.u32 <- numbers:
+-1
+->
+
+arr.int <- ints:
+not_an_int
+->
+
+arr.flt <- floats:
+not_a_float
+->
+
+arr.bool <- bools:
+maybe
+->
+
+arr.str <- strings:
+\q
+->
+
+arr.u8 <- polluted:
+1
+-> garbage
+
+obj polluted:
+==> garbage
+
+obj nested:
+nested: [obj]
+==>
+
+obj missing:
+this_is_not_valid_object_syntax
+==>
+
+another_byte: [byte] = -999999
+another_byte_overflow: [byte] = 999999
+another_uint: [uint] = -999999
+another_int: [int] = 999999999999999999999
+another_float: [flt] = not_a_number
+another_bool: [bool] = yesnt

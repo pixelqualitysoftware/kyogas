@@ -1,5 +1,7 @@
-byte test: -67
+byte test: 67
 
 arr<byte> <-bytes
     67
 ->
+
+int an_int: 68
