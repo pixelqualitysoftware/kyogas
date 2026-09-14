@@ -27,7 +27,7 @@ class Program
 
         if (File.Exists(file))
         {
-            parser.parse(file);
+            parser.Parse(file);
         }
         else
         {

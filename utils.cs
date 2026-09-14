@@ -8,70 +8,33 @@ namespace Utils;
 
 public static class Helper
 {
-    public static string[] types = {
-            "int",
-            "byte",
-            "uint",
-            "str",
-            "bool",
-            "arr",
-            "flt",
-            "obj",
-            "short",
-            "ushot",
-            "sbyte",
-            "long",
-            "ulong"
-          };
-
-    public static string[] truthy = {
-            "t",
-            "true",
-            "yes",
-            "1",
-            "on"
-    };
-    public static string[] falsy = {
-            "f",
-            "false",
-            "no",
-            "0",
-            "off"
-    };
-
-    public static string nums = "-1234567890";
-    public static string fltNums = "-1234567890.";
-    public static char[] strs = ['\'', '"'];
-
-    public static bool boolify(string str, uint ln)
+    public static string[] Types = { "int", "byte", "uint", "str", "bool", "arr", "flt", "obj" };
+    public static string[] Bools = { "f", "t", "true", "false" };
+    public static string Nums = "-1234567890";
+    public static string FltNums = "-1234567890.";
+    public static char[] Strs = ['\'', '"',];
+    public static object Boolify(string str)
     {
-        if (truthy.Contains(str)) return true;
-        if (falsy.Contains(str)) return false;
-
-        WriteLine($"bool.Invalid [{ln}]: {str} is not a valid boolean.");
-        Write("Tip:\nValid booleans\ntruthy: \n\t");
-        foreach (var x in truthy) Write($"{x} ");
-        WriteLine();
-        Write("falsy: ");
-        foreach (var x in falsy) Write($"{x} ");
-        WriteLine();
-        return false;
-    }
-    public static string escapeCheck(string str, uint ln)
-    {
-        foreach (char character in str)
+        switch (str)
         {
-            int cIndex = str.IndexOf(character);
-            if (character == '\\')
+            case "f": return false;
+            case "t": return true;
+            case "true": return true;
+            case "false": return false;
+            default: WriteLine($"bool.invalid: {str} is not a valid boolean"); return null;
+        }
+    }
+    public static string EscapeCheck(string str, uint ln)
+    {
+        foreach (char c in str)
+        {
+            int cIndex = str.IndexOf(c);
+            if (c == '\\')
             {
                 switch (str[cIndex + 1])
                 {
-                    case 'n':
-                        str = str.Replace("\\n", "\n");
-                        break;
-                    case 't':
-                        str = str.Replace("\\t", "\t");
-                        break;
+                    case 'n': str = str.Replace("\\n", "\n"); break;
+                    case 't': str = str.Replace("\\t", "\t"); break;
                     case '\\':
                     default:
                         WriteLine($"str.escape.unknown [{ln}]: '\\{character}' is not a recognized escape sequence.");
@@ -81,11 +44,10 @@ public static class Helper
         }
         return str;
     }
-    public static string unquote(string str, uint ln)
+    public static string Unquote(string str, uint ln)
     {
         char first = str[0];
-        char last = str[str.Length - 1];
-
+        char last = str[^1];
         if (first == '"' && last == '"' || (first == '\'' && last == first))
         {
             return str[1..^1];
@@ -99,17 +61,15 @@ public static class Helper
         return str[1..^1];
 
     }
-    public static string getType(string str, uint ln)
+    public static string GetType(string str, uint ln)
     {
 
         string[] _temp = str.Split(' ', 2);
         string _type = _temp[0];
-
-        if (_type.StartsWith("arr<") && _type.EndsWith(">"))
+        if (_type.StartsWith("arr<") && _type.EndsWith('>'))
         {
             string subtype = _type.Split('<')[1];
-            // to get rid of the closing '>'
-            subtype = subtype[0..^1];
+            subtype = subtype[0..^1]; // to get rid of the closing '>'
             return subtype switch
             {
                 "int" => "arr.int",
@@ -118,35 +78,24 @@ public static class Helper
                 "uint" => "arr.u32",
                 "str" => "arr.str",
                 "bool" => "arr.bool",
-                "short" => "arr.i16",
-                "ushort" => "arr.u16",
-                "long" => "arr.i64",
-                "ulong" => "arr.u64",
-                "sbyte" => "arr.i8",
                 _ => ""
             };
         }
-        else if (_type.StartsWith("arr<") && _type.EndsWith(">") == false)
+        else if (_type.StartsWith("arr<") && !_type.EndsWith('>'))
         {
             WriteLine($"type.arr.unclosed [{ln}]: Array type delcaration is missing the closing angle bracket ('>')");
             return "";
         }
-        else if (_type.StartsWith("arr.") && _type.Contains("<") == false && _type.EndsWith(">"))
+        else if (_type.StartsWith("arr.") && !_type.Contains('<') && _type.EndsWith('>'))
         {
             WriteLine($"type.arr.unopened [{ln}]: Array type delcaration is missing the opening angle bracket ('<')");
             return "";
         }
-        if (str.Contains("<==") && str.LastIndexOf("=") == str.Length - 1 && str.StartsWith("obj "))
-        {
-            return "obj";
-        }
-        else if (Helper.types.Contains(_type))
-        {
-            return _type;
-        }
+        if (str.Contains("<==") && str.LastIndexOf('=') == str.Length - 1 && str.StartsWith("obj ")) return "obj";
+        else if (Helper.Types.Contains(_type)) return _type;
         else
         {
-            if (Helper.types.Contains(_type.ToLower()))
+            if (Helper.Types.Contains(_type.ToLower()))
             {
                 WriteLine($"type.similar [{ln}]: There is no such type '{_type}'. Did you mean {_type.ToLower()}?");
                 return "";
@@ -161,14 +110,9 @@ public static class IsIt
     {
         uint matches = 0;
         uint i = 0;
-
         while (i < str.Length)
         {
-            if (Helper.nums.Contains(str[(int)i]))
-            {
-                matches++;
-            }
-
+            if (Helper.Nums.Contains(str[(int)i])) matches++;
             i++;
         }
         if (str.Length == 1 && str[0] == '-')
@@ -193,17 +137,13 @@ public static class IsIt
         }
         return true;
     }
-    public static bool flt(string str, uint ln)
+    public static bool Flt(string str, uint ln)
     {
         uint matches = 0;
         uint i = 0;
-
         while (i < str.Length)
         {
-            if (Helper.fltNums.Contains(str[(int)i]))
-            {
-                matches++;
-            }
+            if (Helper.FltNums.Contains(str[(int)i])) matches++;
             i++;
         }
         if (matches != str.Length || str.Count(c => c == '.') > 1)
@@ -211,10 +151,9 @@ public static class IsIt
             WriteLine($"flt.invalid [{ln}]: '{str}' is not a valid float.");
             return false;
         }
-        else if (str.Contains(".") && str.Count(c => c == '.') == 1)
+        else if (str.Contains('.') && str.Count(c => c == '.') == 1)
         {
-            int x = str.IndexOf(".") + 1;
-
+            int x = str.IndexOf('.') + 1;
             if (x == str.Length)
             {
                 WriteLine($"flt.invalid [{ln}]: '{str}' is not a valid float.");
@@ -228,17 +167,14 @@ public static class IsIt
         }
         return true;
     }
-    public static bool positive(string str, uint ln)
+    public static bool Positive(string str, uint ln)
     {
         if (str.Contains('-'))
         {
             WriteLine($"uint.underflow [{ln}]: {str} is negative. Unsigned integers cannot be negative.");
             return false;
         }
-        try
-        {
-            uint _a = Convert.ToUInt32(str);
-        }
+        try { uint _a = Convert.ToUInt32(str); }
         catch (Exception)
         {
             WriteLine($"uint.underflow [{ln}]: {str} is negative. Unsigned integers cannot be negative.");
@@ -246,14 +182,14 @@ public static class IsIt
         }
         return true;
     }
-    public static bool u8(string str, uint ln)
+    public static bool U8(string str, uint ln)
     {
         if (string.IsNullOrWhiteSpace(str))
         {
             WriteLine($"byte.empty [{ln}]: expected a byte, got nothing.");
             return false;
         }
-        // check if theres a '-' symbol -- no real reason to convert to an int first.
+        // check if theres a - no real reason to convert to an int first.
         if (str[0] == '-')
         {
             WriteLine($"byte.underflow [{ln}]: {str} is negative. Bytes cannot be negative.");
@@ -264,77 +200,19 @@ public static class IsIt
             WriteLine($"byte.overflow [{ln}]: Value {str} is greater than the 8 bit unsigned integer limit (255)\n(Basically, this shouldn't be over 255)");
             return false;
         }
-        if (byte.TryParse(str, out _) == false)
+        if (!byte.TryParse(str, out _))
         {
             WriteLine($"byte.invalid [{ln}]: '{str}' is not a valid byte (0-255).");
             return false;
         }
         return true;
     }
-    public static bool i64(string str, uint ln)
-    {
-        try
-        {
-            _ = Convert.ToInt64(str);
-        }
-        catch
-        {
-            WriteLine($"long.invalid [{ln}]: {str} is not a valid long.");
-            return false;
-        }
-
-        return true;
-    }
-    public static bool u64(string str, uint ln)
-    {
-        try
-        {
-            _ = Convert.ToUInt64(str);
-        }
-        catch
-        {
-            WriteLine($"ulong.invalid [{ln}]: {str} is not a valid ulong.");
-            return false;
-        }
-
-        return true;
-    }
-    public static bool i16(string str, uint ln)
-    {
-        try
-        {
-            _ = Convert.ToInt16(str);
-        }
-        catch
-        {
-            WriteLine($"short.invalid [{ln}]: {str} is not a valid short.");
-            return false;
-        }
-
-        return true;
-    }
-    public static bool u16(string str, uint ln)
-    {
-        try
-        {
-            _ = Convert.ToUInt16(str);
-        }
-        catch
-        {
-            WriteLine($"ushort.invalid [{ln}]: {str} is not a valid ushort.");
-            return false;
-        }
-
-        return true;
-    }
-
-    public static bool str(string str, uint ln)
+    public static bool Str(string str, uint ln)
     {
         str = str.Trim();
         char first = str[0];
-        char last = str[str.Length - 1];
-        str = Helper.unquote(str, ln);
-
+        char last = str[^1];
+        str = Helper.Unquote(str, ln);
         if (str == "") return false;
         else return true;
     }
@@ -349,5 +227,5 @@ public class Data
     public bool IsArr { get; set; }
     public Dictionary<string, object> Object { get; set; }
     public bool IsObj { get; set; }
-    public List<string> objType { get; set; }
+    public List<string> ObjType { get; set; }
 }
