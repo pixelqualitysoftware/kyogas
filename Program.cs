@@ -6,7 +6,7 @@ class Program
 {
     static void Main(string[] argv)
     {
-        if (argv.Length < 2)
+        if (argv.Length < 1)
         {
             WriteLine("parser.huh: uh... what am i supposed to parse? please provide a .kyo file as an argument.");
             return;
@@ -17,7 +17,7 @@ class Program
         // Kind of redundant, but the check above may not catch this
         try
         {
-            file = argv[1];
+            file = argv[0];
         }
         catch (IndexOutOfRangeException)
         {
