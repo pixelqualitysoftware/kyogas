@@ -9,5 +9,6 @@
     <Compile Include="Program.cs" />
     <Compile Include="parser.cs" />
     <Compile Include="utils.cs" />
+    <Compile Include="lexer.cs" />
   </ItemGroup>
 </Project>
