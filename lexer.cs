@@ -8,15 +8,16 @@ using System.Collections.Generic;
 using static System.Console;
 using System.Linq;
 
-namespace Kiogas;
+using Kiogas;
+using System;
+
 
 public class Lexer
 {
     public readonly Dictionary<string, TokenType> toktypes;
-    private int errors;
+    private uint errors;
 
-    public enum TokenType
-    {
+    public enum TokenType {
         // Generic compiler stuff
         STR_LIT,
         LIT,
@@ -57,6 +58,9 @@ public class Lexer
     {
         public readonly TokenType type;
         public readonly Val       value;
+
+        public readonly uint      line;
+        public readonly uint      column;
 
         public readonly struct Val
         {
@@ -105,6 +109,9 @@ public class Lexer
         public Token
         (
             TokenType type, 
+            uint      line,
+            uint      column,
+
             int?      i   = null, 
             string?   s   = null,
             float?    f   = null,
@@ -119,17 +126,21 @@ public class Lexer
         )
         {
             this.type = type;
+            this.line = line;
+            this.column = column;
             value = new(i, s, f, u, by, b, sh, ush, sby, l, ul);
         }
 
         public void Print(Dictionary<string, TokenType> toktypes)
         {
             TokenType t = type;
-            Write("type: ");
+            Write("Type: ");
             if (t == TokenType.STR_LIT) Write("<str lit>");
             if (t == TokenType.NUM_LIT) Write("<num lit>");
             if (t == TokenType.FLOAT_LIT) Write("<float lit>");
             if (t == TokenType.LIT) Write("<lit>");
+
+            Write($" at {line}:{column}");
 
             Write(toktypes.FirstOrDefault(x => x.Value == t).Key + "\n");
 
@@ -182,17 +193,36 @@ public class Lexer
 
         errors = 0;
     }
+    
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     static bool IsEof(char c) => c == '\0';
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     static bool IsSymbol(char c) => c == '-' || c == '=' || c == '<' || c == '>' || c == ':';
+
+    public string ReadWithNewlines(string path)
+    {
+        string[] ctx = File.ReadAllLines(path);
+
+        for (int i = 0; i < ctx.Length; i++)
+        {
+            ctx[i] += '\n';
+        }
+
+        StringBuilder str = new();
+        foreach (string s in ctx)
+        {
+            str.Append(s);
+        }
+        str.Append('\0');
+
+        return str.ToString();
+    }
     
     public List<Token> Read(string fpath)
     {
-        string ctx = File.ReadAllText(fpath);
-        ctx += '\0';
+        string ctx = ReadWithNewlines(fpath);
 
         int i = 0;
         char c = ctx[i];
@@ -200,10 +230,14 @@ public class Lexer
         StringBuilder buffer = new();
         List<Token> v = new();
 
+        uint line = 1;
+        uint column = 1;
+
         while (!IsEof(c))
         {
             if (char.IsLetter(c))
             {
+                uint pos = column;
                 while (char.IsLetter(c))
                 {
                     buffer.Append(c);
@@ -216,7 +250,7 @@ public class Lexer
                 if (toktypes.TryGetValue(buffer.ToString(), out t))
                 {
                     // It's a type
-                    Token tok = new(t);
+                    Token tok = new(t, pos, column);
                     v.Add(tok);
 
                     buffer.Clear();
@@ -224,54 +258,164 @@ public class Lexer
                 else
                 {
                     // It's obviously a literal then
-                    Token tok = new(TokenType.LIT, s: buffer.ToString());
+                    Token tok = new(TokenType.LIT, pos, column, s: buffer.ToString());
                     v.Add(tok);
 
                     buffer.Clear();
                 }
             }
+            else if (c == '\n')
+            {
+                i++;
+                c = ctx[i];
+
+                line++;
+                column = 1;
+            }
             else if (char.IsDigit(c))
             {
-                // TODO
+                uint pos = column;
+                while (char.IsDigit(c) || c == '.')
+                {
+                    buffer.Append(c);
+
+                    i++;
+                    c = ctx[i];
+
+                    column++;
+                }
+
+                if (buffer.ToString().Contains('.')) 
+                {
+                    float? f = null;
+                    try
+                    {
+                        f = float.Parse(buffer.ToString(), System.Globalization.CultureInfo.InvariantCulture);
+                    }
+                    catch (FormatException)
+                    {
+                        WriteLine($"{fpath}:{line}:{pos}: lexer.float.formatting: Float is not formatted correctly");
+                        errors++;
+                    }
+                    catch (OverflowException)
+                    {
+                        WriteLine($"{fpath}:{line}:{pos}: lexer.float.overflow: Float is overflowing/underflowing");
+                        errors++;
+                    }
+                    finally
+                    {
+                        if (f != null)
+                        {
+                            Token tok = new(TokenType.FLOAT_LIT, line, pos, f: f);
+                            v.Add(tok);
+
+                            buffer.Clear();
+                        }
+                    }
+                }
+                else
+                {
+                    int? num = null;
+                    try
+                    {
+                        num = int.Parse(buffer.ToString());
+                    }
+                    catch (FormatException)
+                    {
+                        WriteLine($"{fpath}:{line}:{pos}: lexer.num.formatting: Number is not formatted correctly");
+                        errors++;
+                    }
+                    catch (OverflowException)
+                    {
+                        WriteLine($"{fpath}:{line}:{pos}: lexer.num.overflow: Number is overflowing/underflowing");
+                        errors++;
+                    }
+                    finally
+                    {
+                        if (num != null)
+                        {
+                            Token tok = new(TokenType.NUM_LIT, line, pos, i: num);
+                            v.Add(tok);
+
+                            buffer.Clear();
+                        }
+                    }
+                }
             }
             else if (char.IsWhiteSpace(c))
             {
                 i++;
                 c = ctx[i];
+
+                column++;
+            }
+            else if (c == '"')
+            {
+                uint pos = column;
+
+                // Handle the string
+                i++;
+                c = ctx[i];
+
+                column++;
+
+                while (c != '"')
+                {
+                    buffer.Append(c);
+
+                    i++;
+                    c = ctx[i];
+
+                    column++;
+                }
+
+                // Advance because we're on char "
+                i++;
+                c = ctx[i];
+                column++;
+
+                Token tok = new(TokenType.STR_LIT, line, pos, s: buffer.ToString());
+                v.Add(tok);
+
+                buffer.Clear();
             }
             else if (IsSymbol(c))
             {
+                uint pos = column;
+
                 while (IsSymbol(c))
                 {
                     buffer.Append(c);
 
                     i++;
                     c = ctx[i];
+
+                    column++;
                 }
 
                 TokenType t;
                 if (toktypes.TryGetValue(buffer.ToString(), out t))
                 {
-                    Token tok = new(t);
+                    Token tok = new(t, line, pos);
 
                     v.Add(tok);
                     buffer.Clear();
                 }
                 else
                 {
-                    WriteLine($"lexer.unknown: Unknown symbol \"{buffer}\"");
+                    WriteLine($"{fpath}:{line}:{pos}: lexer.unknown.symbol: Unknown symbol \"{buffer}\"");
                     errors++;
                 }
-                
-                // TODO
             }
             else
             {
-                WriteLine($"lexer.unknown: Unknown character {c}");
+                WriteLine($"{fpath}:{line}:{column}: lexer.unknown.char: Unknown character {c}");
                 errors++;
 
                 i++;
                 c = ctx[i];
+
+                column++;
             }
         }
 
