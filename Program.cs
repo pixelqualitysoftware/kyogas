@@ -2,6 +2,8 @@
 using System;
 using System.IO;
 using Kiogas;
+using System.Collections.Generic;
+
 class Program
 {
     static void Main(string[] argv)
@@ -27,7 +29,15 @@ class Program
 
         if (File.Exists(file))
         {
-            parser.parse(file);
+            // parser.parse(file);
+            Lexer lexer = new Lexer();
+            List<Lexer.Token> toks = lexer.Read(file);
+
+            foreach (var tok in toks)
+            {
+                tok.Print(lexer.toktypes);
+                WriteLine("");
+            }
         }
         else
         {

@@ -18,15 +18,15 @@ As mentioned before, Kyogas has static typing, which means that every key has a 
 
 Types are mostly intuitive, but for clarification purposes, here is a small table:
 
-|  Kyogas  | C#  |
-|----|----|
-|  str  |  string  |
-|  int  |  int  |
-|  flt  |  float  |
-|  uint |  uint  |
-|  byte |  byte  |
-|  bool |  bool  |
-|  arr<type>  | type[]  |
+|  Kyogas    |    C#    |
+|------------|----------|
+|  str       |  string  |
+|  int       |  int     |
+|  flt       |  float   |
+|  uint      |  uint    |
+|  byte      |  byte    |
+|  bool      |  bool    |
+|  arr<type> | type[]   |
 
 ## Arrays
 
