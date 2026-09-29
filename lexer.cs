@@ -7,9 +7,9 @@ using System.Text;
 using System.Collections.Generic;
 using static System.Console;
 using System.Linq;
-
-using Kiogas;
 using System;
+
+namespace Kiogas;
 
 
 public class Lexer

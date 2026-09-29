@@ -9,42 +9,41 @@ namespace Utils;
 public static class Helper
 {
     public static string[] types = {
-            "int",
-            "byte",
-            "uint",
-            "str",
-            "bool",
-            "arr",
-            "flt",
-            "obj",
-            "short",
-            "ushot",
-            "sbyte",
-            "long",
-            "ulong"
-          };
+        "int",
+        "byte",
+        "uint",
+        "str",
+        "bool",
+        "arr",
+        "flt",
+        "obj",
+        "short",
+        "ushot",
+        "sbyte",
+        "long",
+        "ulong"
+    };
 
     public static string[] truthy = {
-            "t",
-            "true",
-            "yes",
-            "1",
-            "on"
+        "t",
+        "true",
+        "yes",
+        "1",
+        "on"
     };
     public static string[] falsy = {
-            "f",
-            "false",
-            "no",
-            "0",
-            "off"
+        "f",
+        "false",
+        "no",
+        "0",
+        "off"
     };
 
     public static string nums = "-1234567890";
     public static string fltNums = "-1234567890.";
     public static char[] strs = ['\'', '"'];
 
-    public static bool boolify(string str, uint ln)
-    {
+    public static bool boolify(string str, uint ln) {
         if (truthy.Contains(str)) return true;
         if (falsy.Contains(str)) return false;
 
@@ -57,8 +56,7 @@ public static class Helper
         WriteLine();
         return false;
     }
-    public static string escapeCheck(string str, uint ln)
-    {
+    public static string escapeCheck(string str, uint ln) {
         foreach (char character in str)
         {
             int cIndex = str.IndexOf(character);
@@ -81,17 +79,14 @@ public static class Helper
         }
         return str;
     }
-    public static string unquote(string str, uint ln)
-    {
+    public static string unquote(string str, uint ln) {
         char first = str[0];
         char last = str[str.Length - 1];
 
-        if (first == '"' && last == '"' || (first == '\'' && last == first))
-        {
+        if (first == '"' && last == '"' || (first == '\'' && last == first)) {
             return str[1..^1];
         }
-        else if (first != last)
-        {
+        else if (first != last) {
             Console.WriteLine($"str.misquoted [{ln}]: string {str} has a mismatched/missing quote.");
             return "";
         }
@@ -99,19 +94,16 @@ public static class Helper
         return str[1..^1];
 
     }
-    public static string getType(string str, uint ln)
-    {
+    public static string getType(string str, uint ln) {
 
         string[] _temp = str.Split(' ', 2);
         string _type = _temp[0];
 
-        if (_type.StartsWith("arr<") && _type.EndsWith(">"))
-        {
+        if (_type.StartsWith("arr<") && _type.EndsWith(">")) {
             string subtype = _type.Split('<')[1];
             // to get rid of the closing '>'
             subtype = subtype[0..^1];
-            return subtype switch
-            {
+            return subtype switch {
                 "int" => "arr.int",
                 "flt" => "arr.flt",
                 "byte" => "arr.u8",
@@ -126,33 +118,30 @@ public static class Helper
                 _ => ""
             };
         }
-        else if (_type.StartsWith("arr<") && _type.EndsWith(">") == false)
-        {
+        else if (_type.StartsWith("arr<") && _type.EndsWith(">") == false) {
             WriteLine($"type.arr.unclosed [{ln}]: Array type delcaration is missing the closing angle bracket ('>')");
             return "";
         }
-        else if (_type.StartsWith("arr.") && _type.Contains("<") == false && _type.EndsWith(">"))
-        {
+        else if (_type.StartsWith("arr.") && _type.Contains("<") == false && _type.EndsWith(">")) {
             WriteLine($"type.arr.unopened [{ln}]: Array type delcaration is missing the opening angle bracket ('<')");
             return "";
         }
-        if (str.Contains("<==") && str.LastIndexOf("=") == str.Length - 1 && str.StartsWith("obj "))
-        {
+        if (str.Contains("<==") && str.LastIndexOf("=") == str.Length - 1 && str.StartsWith("obj ")) {
             return "obj";
         }
-        else if (Helper.types.Contains(_type))
-        {
-            return _type;
-        }
-        else
-        {
-            if (Helper.types.Contains(_type.ToLower()))
-            {
+        else if (Helper.types.Contains(_type)) return _type;
+
+        else {
+            if (Helper.types.Contains(_type.ToLower())) {
                 WriteLine($"type.similar [{ln}]: There is no such type '{_type}'. Did you mean {_type.ToLower()}?");
                 return "";
             }
         }
         return "";
+    }
+    public static void printERR(string message, string path, uint ln, uint col, ushort id) {
+        if (id > 100) WriteLine($"in {path} -> {ln}:{col} (KY{id}): {message}");
+        else WriteLine($"in {path} -> {ln}:{col} (KY0{id}): {message}");
     }
 }
 public static class IsIt
