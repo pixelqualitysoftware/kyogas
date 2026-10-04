@@ -14,7 +14,7 @@ public class Parser
 {
     private const Lexer L = new Lexer();
     private List<Token> tokens;
-    private uint pos = 0;
+    private int pos = 0;
     private Dictionary<string, Data> data = new();
     private List<string> names = new();
     private string path; 
@@ -35,11 +35,10 @@ public class Parser
         if (check(tt)) return move();
         throw new Exception($"Expected {tt}, but found {curr().type} at {curr().line}:{curr().column}");
     }
-    public Parser() { this.tokens = Read(this.path); }
+    public Parser(string path) { this.path = path; this.tokens = Read(this.path); this.ctx = ReadWithNewlines(this.path); }
 
     public void parsePRIM(TokenType tt, TokenType lit, string type) {
         // blueprint: Type whitespace COLON whitespace* LIT
-        // I forgot to fucking close vs code - me
         Token t = curr();
         if (check(tt)) {
             //while (!check(TokenType.COLON)) t = move();
@@ -51,7 +50,7 @@ public class Parser
             );
             if (Match(TokenType.COLON))  
             else {
-                printERR($"expected ':', got {t}", this.path, this.line, this.col, 22);
+                printERR($"expected ':', got {t}", this.path, curr().line, curr().col, 22);
                 return;
             }
             if (!check(lit)) printERR($"expected value of type {lit}, got {type}.", 
@@ -72,7 +71,7 @@ public class Parser
                 printERR($"expected ':', got {t}", this.path, this.line, this.col, 22); 
                 return;
             }
-                
+            if (check(TokenType.LIT))
         }
     }
 }

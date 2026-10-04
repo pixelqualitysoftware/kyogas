@@ -23,7 +23,6 @@ public class Lexer
         LIT,
         NUM_LIT,
         FLOAT_LIT,
-
         // Symbols
         LESS_THAN,
         GREATER_THAN,
@@ -46,12 +45,27 @@ public class Lexer
         BYTE,
         ARR,
         OBJ,
-
         SHORT,
         USHOT,
         SBYTE,
         LONG,
-        ULONG
+        ULONG,
+        // EOF
+        EOF,
+        // TRUE
+        TRUE,
+        T,
+        YES,
+        ONE,
+        ON,
+        // false
+        F,
+        FALSE,
+        NO,
+        ZERO,
+        OFF,
+        // null
+        EMPTY
     }
 
     public readonly struct Token
@@ -171,13 +185,26 @@ public class Lexer
             ["byte"] = TokenType.BYTE,
             ["arr"]  = TokenType.ARR,
             ["obj"]  = TokenType.OBJ,
-
             ["short"] = TokenType.SHORT,
             ["ushot"] = TokenType.USHOT,
             ["sbyte"] = TokenType.SBYTE,
             ["long"]  = TokenType.LONG,
             ["ulong"] = TokenType.ULONG,
 
+            ["empty"] = TokenType.EMPTY,
+            // bools - true
+            ["true"]  = TokenType.TRUE,
+            ["false"] = TokenType.FALSE,
+            ["1"]     = TokenType.ONE,
+            ["t"]     = TokenType.T,
+            ["on"]    = TokenType.ON,
+
+            // bools - false 
+            ["f"]     = TokenType.F,
+            ["0"]     = TokenType.ZERO,
+            ["false"] = TokenType.FALSE,
+            ["no"]    = TokenType.NO,
+            ["off"]   = TokenType.OFF,
             // Symbols
             ["->"]    = TokenType.ARROW_RIGHT,
             ["<-"]    = TokenType.ARROW_LEFT,
@@ -189,8 +216,9 @@ public class Lexer
             ["-"]     = TokenType.MINUS,
             ["="]     = TokenType.EQUALS,
             [":"]     = TokenType.COLON
-        };
 
+        };
+        //string[] booleans = {""}
         errors = 0;
     }
     
@@ -418,7 +446,8 @@ public class Lexer
                 column++;
             }
         }
-
+        Token end = new(TokenType.EOF, line, column);
+        v.add(end);
         return v;
     }
 }
