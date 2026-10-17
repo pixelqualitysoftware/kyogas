@@ -50,22 +50,19 @@ public class Lexer
         SBYTE,
         LONG,
         ULONG,
-        // EOF
+        // EOF - EOL
         EOF,
-        // TRUE
+        EOL
+        // true aliases
         TRUE,
         T,
         YES,
-        ONE,
         ON,
-        // false
+        // false aliases
         F,
         FALSE,
         NO,
-        ZERO,
-        OFF,
-        // null
-        EMPTY
+        OFF
     }
 
     public readonly struct Token
@@ -195,13 +192,13 @@ public class Lexer
             // bools - true
             ["true"]  = TokenType.TRUE,
             ["false"] = TokenType.FALSE,
-            ["1"]     = TokenType.ONE,
+            // ["1"]     = TokenType.ONE,
             ["t"]     = TokenType.T,
             ["on"]    = TokenType.ON,
 
             // bools - false 
             ["f"]     = TokenType.F,
-            ["0"]     = TokenType.ZERO,
+            // ["0"]     = TokenType.ZERO,
             ["false"] = TokenType.FALSE,
             ["no"]    = TokenType.NO,
             ["off"]   = TokenType.OFF,
@@ -296,7 +293,7 @@ public class Lexer
             {
                 i++;
                 c = ctx[i];
-
+                Token t = new (TokenType.EOL, pos, column);
                 line++;
                 column = 1;
             }
@@ -322,12 +319,12 @@ public class Lexer
                     }
                     catch (FormatException)
                     {
-                        WriteLine($"{fpath}:{line}:{pos}: lexer.float.formatting: Float is not formatted correctly");
+                        WriteLine($"{fpath}:{line}:{pos} (KY017): Float is not formatted correctly");
                         errors++;
                     }
                     catch (OverflowException)
                     {
-                        WriteLine($"{fpath}:{line}:{pos}: lexer.float.overflow: Float is overflowing/underflowing");
+                        WriteLine($"{fpath}:{line}:{pos} (KY003): Float is overflowing/underflowing");
                         errors++;
                     }
                     finally
@@ -350,12 +347,12 @@ public class Lexer
                     }
                     catch (FormatException)
                     {
-                        WriteLine($"{fpath}:{line}:{pos}: lexer.num.formatting: Number is not formatted correctly");
+                        WriteLine($"{fpath}:{line}:{pos}: (KY017): Number is not formatted correctly");
                         errors++;
                     }
                     catch (OverflowException)
                     {
-                        WriteLine($"{fpath}:{line}:{pos}: lexer.num.overflow: Number is overflowing/underflowing");
+                        WriteLine($"{fpath}:{line}:{pos}: (KY003): Number is overflowing/underflowing");
                         errors++;
                     }
                     finally
@@ -437,7 +434,7 @@ public class Lexer
             }
             else
             {
-                WriteLine($"{fpath}:{line}:{column}: lexer.unknown.char: Unknown character {c}");
+                WriteLine($"{fpath}:{line}:{column}: lexer.unknown.char: Unknown character '{c}'");
                 errors++;
 
                 i++;

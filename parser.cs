@@ -6,10 +6,6 @@ using Utils;
 using static System.Console;
 using Kiogas;
 
-    /*private bool hasERRORS = false;
-    private bool inArr = false; // currently inside of an array
-    private bool inObj = false; // currently inside of an object
-    private ushort errorCOUNT = 0;*/
 public class Parser
 {
     private const Lexer L = new Lexer();
@@ -18,30 +14,13 @@ public class Parser
     private Dictionary<string, Data> data = new();
     private List<string> names = new();
     private string path; 
-
-    private TokenType peek() => tokens[pos+1];
-    private TokenType curr() => tokens[pos];
-    private Token move() {
-        Token t = tokens[pos];
-        if (pos < tokens.Count - 1) pos++;
-        return t;
-    }
-    private bool check(TokenType tt) => peek() == tt;
-    private bool Match(TokenType tt) {
-        if (check(ty)) {move(); return true; }
-        return false;
-    }
-    private Token exp(TokenType tt) {
-        if (check(tt)) return move();
-        throw new Exception($"Expected {tt}, but found {curr().type} at {curr().line}:{curr().column}");
-    }
+    private string ctx;
     public Parser(string path) { this.path = path; this.tokens = Read(this.path); this.ctx = ReadWithNewlines(this.path); }
 
     public void parsePRIM(TokenType tt, TokenType lit, string type) {
         // blueprint: Type whitespace COLON whitespace* LIT
         Token t = curr();
         if (check(tt)) {
-            //while (!check(TokenType.COLON)) t = move();
             if (check(TokenType.EOF)) printERR("expected a literal, got <EOF> (End Of File)", 
                 this.path,
                 curr().line,
@@ -59,6 +38,7 @@ public class Parser
                 curr().col,
                 21
             );
+            // if (check())
         }
     }
     public void parseBOOL() {
@@ -68,10 +48,14 @@ public class Parser
             if (check(TokenType))
             if (check(TokenType.COLON)) t = move();
             else {
-                printERR($"expected ':', got {t}", this.path, this.line, this.col, 22); 
+                printERR($"expected ':', got {t}", 
+                    this.path, 
+                    curr().line, 
+                    curr().col, 
+                    22); 
                 return;
             }
-            if (check(TokenType.LIT))
+            t.Value.b = move().Value; // I have zero clue if this works 
         }
     }
 }
