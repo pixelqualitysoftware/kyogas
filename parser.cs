@@ -6,6 +6,25 @@ using Utils;
 using static System.Console;
 using Kiogas;
 
+private class H {
+    private TokenType peek() => tokens[pos+1];
+    private TokenType curr() => tokens[pos];
+    private Token move() {
+        Token t = tokens[pos];
+        if (pos < tokens.Count - 1) pos++;
+        return t;
+    }
+    private bool check(TokenType tt) => peek() == tt;
+    private bool Match(TokenType tt) {
+        if (check(ty)) {move(); return true; }
+        return false;
+    }
+    private Token exp(TokenType tt) {
+        if (check(tt)) return move();
+        throw new Exception($"Expected {tt}, but found {curr().type} at {curr().line}:{curr().column}");
+    }
+}
+
 public class Parser
 {
     private const Lexer L = new Lexer();
